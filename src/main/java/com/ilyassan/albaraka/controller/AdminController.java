@@ -6,6 +6,8 @@ import com.ilyassan.albaraka.dto.TransactionResponse;
 import com.ilyassan.albaraka.entity.User;
 import com.ilyassan.albaraka.entity.UserRole;
 import com.ilyassan.albaraka.entity.Transaction;
+import com.ilyassan.albaraka.mapper.UserMapper;
+import com.ilyassan.albaraka.mapper.TransactionMapper;
 import com.ilyassan.albaraka.service.UserService;
 import com.ilyassan.albaraka.service.TransactionService;
 import jakarta.validation.Valid;
@@ -30,6 +32,12 @@ public class AdminController {
     @Autowired
     private TransactionService transactionService;
 
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private TransactionMapper transactionMapper;
+
     @PostMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequest request) {
@@ -43,7 +51,7 @@ public class AdminController {
                     role
             );
 
-            UserResponse response = mapToUserResponse(user);
+            UserResponse response = userMapper.toUserResponse(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             log.error("Error creating user", e);
@@ -60,7 +68,7 @@ public class AdminController {
         try {
             List<User> users = userService.getAllUsers();
             List<UserResponse> responses = users.stream()
-                    .map(this::mapToUserResponse)
+                    .map(userMapper::toUserResponse)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(responses);
         } catch (Exception e) {
@@ -79,7 +87,7 @@ public class AdminController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }
 
-            return ResponseEntity.ok(mapToUserResponse(user));
+            return ResponseEntity.ok(userMapper.toUserResponse(user));
         } catch (Exception e) {
             log.error("Error getting user", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving user");
@@ -91,7 +99,7 @@ public class AdminController {
     public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody CreateUserRequest request) {
         try {
             User user = userService.updateUser(userId, request.getFirstName(), request.getLastName());
-            return ResponseEntity.ok(mapToUserResponse(user));
+            return ResponseEntity.ok(userMapper.toUserResponse(user));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
@@ -120,7 +128,7 @@ public class AdminController {
         try {
             List<Transaction> pendingTransactions = transactionService.getPendingTransactions();
             List<TransactionResponse> responses = pendingTransactions.stream()
-                    .map(this::mapToTransactionResponse)
+                    .map(transactionMapper::toTransactionResponse)
                     .collect(Collectors.toList());
             return ResponseEntity.ok(responses);
         } catch (Exception e) {
@@ -134,7 +142,7 @@ public class AdminController {
     public ResponseEntity<?> approveTransaction(@PathVariable Long transactionId) {
         try {
             Transaction transaction = transactionService.approveTransaction(transactionId);
-            return ResponseEntity.ok(mapToTransactionResponse(transaction));
+            return ResponseEntity.ok(transactionMapper.toTransactionResponse(transaction));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -148,36 +156,12 @@ public class AdminController {
     public ResponseEntity<?> rejectTransaction(@PathVariable Long transactionId) {
         try {
             Transaction transaction = transactionService.rejectTransaction(transactionId);
-            return ResponseEntity.ok(mapToTransactionResponse(transaction));
+            return ResponseEntity.ok(transactionMapper.toTransactionResponse(transaction));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             log.error("Error rejecting transaction", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error rejecting transaction");
         }
-    }
-
-    private UserResponse mapToUserResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .role(user.getRole().name())
-                .enabled(user.getEnabled())
-                .build();
-    }
-
-    private TransactionResponse mapToTransactionResponse(Transaction transaction) {
-        return TransactionResponse.builder()
-                .id(transaction.getId())
-                .type(transaction.getType())
-                .amount(transaction.getAmount())
-                .status(transaction.getStatus().name())
-                .justificationPath(transaction.getJustificationPath())
-                .beneficiaryAccountId(transaction.getBeneficiaryAccountId())
-                .createdAt(transaction.getCreatedAt())
-                .updatedAt(transaction.getUpdatedAt())
-                .build();
     }
 }

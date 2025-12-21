@@ -5,6 +5,7 @@ import com.ilyassan.albaraka.dto.TransactionResponse;
 import com.ilyassan.albaraka.entity.Account;
 import com.ilyassan.albaraka.entity.Transaction;
 import com.ilyassan.albaraka.entity.User;
+import com.ilyassan.albaraka.mapper.TransactionMapper;
 import com.ilyassan.albaraka.repository.UserRepository;
 import com.ilyassan.albaraka.service.AccountService;
 import com.ilyassan.albaraka.service.TransactionService;
@@ -38,6 +39,9 @@ public class TransactionController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TransactionMapper transactionMapper;
+
     @PostMapping("/deposit")
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<?> createDeposit(@Valid @RequestBody TransactionRequest request, Authentication authentication) {
@@ -56,7 +60,7 @@ public class TransactionController {
             }
 
             Transaction transaction = transactionService.createDeposit(account.getId(), request.getAmount());
-            return ResponseEntity.status(HttpStatus.CREATED).body(mapToResponse(transaction));
+            return ResponseEntity.status(HttpStatus.CREATED).body(transactionMapper.toTransactionResponse(transaction));
         } catch (Exception e) {
             log.error("Error creating deposit", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -81,7 +85,7 @@ public class TransactionController {
             }
 
             Transaction transaction = transactionService.createWithdrawal(account.getId(), request.getAmount());
-            return ResponseEntity.status(HttpStatus.CREATED).body(mapToResponse(transaction));
+            return ResponseEntity.status(HttpStatus.CREATED).body(transactionMapper.toTransactionResponse(transaction));
         } catch (Exception e) {
             log.error("Error creating withdrawal", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -114,7 +118,7 @@ public class TransactionController {
                     request.getBeneficiaryAccountId(),
                     request.getAmount()
             );
-            return ResponseEntity.status(HttpStatus.CREATED).body(mapToResponse(transaction));
+            return ResponseEntity.status(HttpStatus.CREATED).body(transactionMapper.toTransactionResponse(transaction));
         } catch (Exception e) {
             log.error("Error creating transfer", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -139,7 +143,7 @@ public class TransactionController {
             }
 
             Page<Transaction> transactions = transactionService.getAccountTransactions(account.getId(), pageable);
-            Page<TransactionResponse> responses = transactions.map(this::mapToResponse);
+            Page<TransactionResponse> responses = transactions.map(transactionMapper::toTransactionResponse);
             return ResponseEntity.ok(responses);
         } catch (Exception e) {
             log.error("Error getting transactions", e);
@@ -157,23 +161,10 @@ public class TransactionController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Transaction not found");
             }
 
-            return ResponseEntity.ok(mapToResponse(transaction));
+            return ResponseEntity.ok(transactionMapper.toTransactionResponse(transaction));
         } catch (Exception e) {
             log.error("Error getting transaction", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving transaction");
         }
-    }
-
-    private TransactionResponse mapToResponse(Transaction transaction) {
-        return TransactionResponse.builder()
-                .id(transaction.getId())
-                .type(transaction.getType())
-                .amount(transaction.getAmount())
-                .status(transaction.getStatus().name())
-                .justificationPath(transaction.getJustificationPath())
-                .beneficiaryAccountId(transaction.getBeneficiaryAccountId())
-                .createdAt(transaction.getCreatedAt())
-                .updatedAt(transaction.getUpdatedAt())
-                .build();
     }
 }
