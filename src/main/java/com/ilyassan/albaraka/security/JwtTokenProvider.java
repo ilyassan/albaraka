@@ -43,20 +43,20 @@ public class JwtTokenProvider {
     }
 
     public String getEmailFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+        return Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
+                .parseSignedClaims(token)
+                .getPayload()
                 .getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
+            Jwts.parser()
+                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()))
                     .build()
-                    .parseClaimsJws(token);
+                    .parseSignedClaims(token);
             return true;
         } catch (MalformedJwtException ex) {
             log.error("Invalid JWT token: {}", ex.getMessage());

@@ -2,6 +2,7 @@ package com.ilyassan.albaraka.controller;
 
 import com.ilyassan.albaraka.entity.Account;
 import com.ilyassan.albaraka.entity.User;
+import com.ilyassan.albaraka.mapper.AccountMapper;
 import com.ilyassan.albaraka.repository.UserRepository;
 import com.ilyassan.albaraka.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,9 @@ public class AccountController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AccountMapper accountMapper;
+
     @GetMapping("/me")
     @PreAuthorize("hasAnyRole('CLIENT', 'AGENT_BANCAIRE', 'ADMIN')")
     public ResponseEntity<?> getCurrentUserAccount(Authentication authentication) {
@@ -44,14 +48,7 @@ public class AccountController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
             }
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", account.getId());
-            response.put("accountNumber", account.getAccountNumber());
-            response.put("balance", account.getBalance());
-            response.put("createdAt", account.getCreatedAt());
-            response.put("updatedAt", account.getUpdatedAt());
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(accountMapper.toAccountResponse(account));
         } catch (Exception e) {
             log.error("Error getting current user account", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving account");
@@ -68,16 +65,7 @@ public class AccountController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
             }
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", account.getId());
-            response.put("accountNumber", account.getAccountNumber());
-            response.put("balance", account.getBalance());
-            response.put("userId", account.getUser().getId());
-            response.put("userEmail", account.getUser().getEmail());
-            response.put("createdAt", account.getCreatedAt());
-            response.put("updatedAt", account.getUpdatedAt());
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(accountMapper.toAccountResponse(account));
         } catch (Exception e) {
             log.error("Error getting account", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving account");
