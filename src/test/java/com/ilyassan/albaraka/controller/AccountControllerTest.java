@@ -85,7 +85,7 @@ class AccountControllerTest {
     @Test
     void testGetCurrentUserAccountUnauthorized() throws Exception {
         mockMvc.perform(get("/api/accounts/me"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
     @Test

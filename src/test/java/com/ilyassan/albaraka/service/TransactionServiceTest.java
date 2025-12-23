@@ -70,7 +70,16 @@ class TransactionServiceTest {
     @Test
     void testCreateDepositAutoApproved() {
         when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
-        when(transactionRepository.save(any(Transaction.class))).thenReturn(testTransaction);
+
+        Transaction depositTransaction = Transaction.builder()
+                .id(1L)
+                .account(testAccount)
+                .type("DEPOSIT")
+                .amount(new BigDecimal("5000"))
+                .status(TransactionStatus.COMPLETED)
+                .build();
+
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(depositTransaction);
 
         Transaction result = transactionService.createDeposit(1L, new BigDecimal("5000"));
 

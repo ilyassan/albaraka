@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ilyassan.albaraka.dto.LoginRequest;
 import com.ilyassan.albaraka.entity.User;
 import com.ilyassan.albaraka.entity.UserRole;
+import com.ilyassan.albaraka.repository.AccountRepository;
 import com.ilyassan.albaraka.repository.UserRepository;
 import com.ilyassan.albaraka.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,9 @@ class AuthControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private User testUser;
@@ -42,6 +46,7 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
+        accountRepository.deleteAll();
         userRepository.deleteAll();
 
         testUser = User.builder()
