@@ -15,6 +15,34 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - albaraka_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: albaraka_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/albaraka_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      APP_JWT_SECRET: "mySecretKeyThatIsLongEnoughForHS512AlgorithmAndCanBeUsedForSigningJWTTokensInProduction"
+      APP_JWT_EXPIRATION: "86400000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - albaraka_network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+
+networks:
+  albaraka_network:
+    driver: bridge
