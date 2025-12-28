@@ -82,14 +82,17 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http
+                .securityMatcher("/**")  // Match all paths not matched by OAuth chain
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/accounts/**").authenticated()
-                        .requestMatchers("/api/transactions/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/admin/users").permitAll()
+                        .requestMatchers("/admin/**").authenticated()
+                        .requestMatchers("/accounts/**").authenticated()
+                        .requestMatchers("/transactions/**").authenticated()
+                        .requestMatchers("/documents/**").authenticated()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )

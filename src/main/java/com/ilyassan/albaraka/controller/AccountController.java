@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/accounts")
+@RequestMapping("/accounts")
 @Slf4j
 public class AccountController {
 

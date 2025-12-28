@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -138,6 +139,22 @@ public class GlobalExceptionHandler {
                 .error("Invalid Argument")
                 .build();
         return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiException> handleNoResourceFoundException(
+            NoResourceFoundException ex,
+            HttpServletRequest request) {
+        log.warn("No resource found: {}", ex.getMessage());
+        ApiException apiException = ApiException.builder()
+                .message("The requested endpoint does not exist")
+                .status(HttpStatus.NOT_FOUND)
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .error("Not Found")
+                .build();
+        return new ResponseEntity<>(apiException, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/transactions")
+@RequestMapping("/transactions")
 @Slf4j
 public class TransactionController {
 

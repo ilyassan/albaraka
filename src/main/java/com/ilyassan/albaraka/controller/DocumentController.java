@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/documents")
 @Slf4j
 public class DocumentController {
 
