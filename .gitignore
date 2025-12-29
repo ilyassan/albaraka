@@ -33,3 +33,6 @@ tasks.md
 
 ### VS Code ###
 .vscode/
+
+### Environment Variables ###
+.env

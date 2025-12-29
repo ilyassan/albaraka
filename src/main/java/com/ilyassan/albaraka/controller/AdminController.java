@@ -38,6 +38,9 @@ public class AdminController {
     @Autowired
     private TransactionMapper transactionMapper;
 
+    @Autowired
+    private com.ilyassan.albaraka.service.AIValidationService aiValidationService;
+
     @PostMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequest request) {
@@ -162,6 +165,20 @@ public class AdminController {
         } catch (Exception e) {
             log.error("Error rejecting transaction", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error rejecting transaction");
+        }
+    }
+
+    @GetMapping("/transactions/{transactionId}/ai-validate")
+    @PreAuthorize("hasRole('AGENT_BANCAIRE')")
+    public ResponseEntity<?> validateWithAI(@PathVariable Long transactionId) {
+        try {
+            com.ilyassan.albaraka.dto.AIValidationResult result = aiValidationService.analyzeTransactionDocument(transactionId);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error validating transaction with AI", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during AI validation");
         }
     }
 }
