@@ -97,13 +97,6 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when {
-                anyOf {
-                    branch 'main'
-                    branch 'master'
-                }
-            }
-
             steps {
                 script {
                     echo "=========================================="
@@ -121,13 +114,6 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            when {
-                anyOf {
-                    branch 'main'
-                    branch 'master'
-                }
-            }
-
             steps {
                 script {
                     echo "=========================================="
@@ -163,13 +149,6 @@ pipeline {
         }
 
         stage('Backup Current Version') {
-            when {
-                anyOf {
-                    branch 'main'
-                    branch 'master'
-                }
-            }
-
             steps {
                 script {
                     echo "=========================================="
@@ -202,13 +181,6 @@ pipeline {
         }
 
         stage('Deploy to Production') {
-            when {
-                anyOf {
-                    branch 'main'
-                    branch 'master'
-                }
-            }
-
             steps {
                 script {
                     echo "=========================================="
@@ -267,13 +239,6 @@ pipeline {
         }
 
         stage('Verify Deployment') {
-            when {
-                anyOf {
-                    branch 'main'
-                    branch 'master'
-                }
-            }
-
             steps {
                 sh """
                     ssh -o StrictHostKeyChecking=no ${DEPLOY_HOST} '
@@ -290,13 +255,6 @@ pipeline {
         }
 
         stage('Cleanup') {
-            when {
-                anyOf {
-                    branch 'main'
-                    branch 'master'
-                }
-            }
-
             steps {
                 sh """
                     ssh -o StrictHostKeyChecking=no ${DEPLOY_HOST} '
