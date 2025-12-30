@@ -5,6 +5,7 @@ import com.ilyassan.albaraka.dto.LoginRequest;
 import com.ilyassan.albaraka.entity.User;
 import com.ilyassan.albaraka.entity.UserRole;
 import com.ilyassan.albaraka.repository.AccountRepository;
+import com.ilyassan.albaraka.repository.TransactionRepository;
 import com.ilyassan.albaraka.repository.UserRepository;
 import com.ilyassan.albaraka.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +40,9 @@ class AuthControllerTest {
     private AccountRepository accountRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private User testUser;
@@ -46,6 +50,8 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
+        // Delete in correct order: transactions -> accounts -> users (respect foreign keys)
+        transactionRepository.deleteAll();
         accountRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -68,7 +74,7 @@ class AuthControllerTest {
 
     @Test
     void testLoginSuccess() throws Exception {
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(validLoginRequest)))
                 .andExpect(status().isOk())
@@ -84,7 +90,7 @@ class AuthControllerTest {
                 .password("wrongpassword")
                 .build();
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isUnauthorized());
@@ -97,7 +103,7 @@ class AuthControllerTest {
                 .password("password123")
                 .build();
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isUnauthorized());
@@ -110,7 +116,7 @@ class AuthControllerTest {
                 .password("password123")
                 .build();
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());

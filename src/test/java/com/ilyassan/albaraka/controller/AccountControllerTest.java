@@ -4,6 +4,7 @@ import com.ilyassan.albaraka.entity.Account;
 import com.ilyassan.albaraka.entity.User;
 import com.ilyassan.albaraka.entity.UserRole;
 import com.ilyassan.albaraka.repository.AccountRepository;
+import com.ilyassan.albaraka.repository.TransactionRepository;
 import com.ilyassan.albaraka.repository.UserRepository;
 import com.ilyassan.albaraka.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,9 @@ class AccountControllerTest {
     private AccountRepository accountRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private User testUser;
@@ -43,6 +47,8 @@ class AccountControllerTest {
 
     @BeforeEach
     void setUp() {
+        // Delete in correct order: transactions -> accounts -> users (respect foreign keys)
+        transactionRepository.deleteAll();
         accountRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -69,7 +75,7 @@ class AccountControllerTest {
     @Test
     @WithMockUser(username = "client@example.com", roles = "CLIENT")
     void testGetCurrentUserAccount() throws Exception {
-        mockMvc.perform(get("/api/accounts/me"))
+        mockMvc.perform(get("/accounts/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountNumber").value("ALBARAKA202512171630459a7b8c9d"))
                 .andExpect(jsonPath("$.balance").value(5000));
@@ -78,20 +84,20 @@ class AccountControllerTest {
     @Test
     @WithMockUser(username = "nonexistent@example.com", roles = "CLIENT")
     void testGetCurrentUserAccountNotFound() throws Exception {
-        mockMvc.perform(get("/api/accounts/me"))
+        mockMvc.perform(get("/accounts/me"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void testGetCurrentUserAccountUnauthorized() throws Exception {
-        mockMvc.perform(get("/api/accounts/me"))
+        mockMvc.perform(get("/accounts/me"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(username = "admin@example.com", roles = "ADMIN")
     void testGetAccountByIdAsAdmin() throws Exception {
-        mockMvc.perform(get("/api/accounts/" + testAccount.getId()))
+        mockMvc.perform(get("/accounts/" + testAccount.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountNumber").value("ALBARAKA202512171630459a7b8c9d"));
     }
@@ -99,14 +105,14 @@ class AccountControllerTest {
     @Test
     @WithMockUser(username = "client@example.com", roles = "CLIENT")
     void testGetAccountByIdAsClient() throws Exception {
-        mockMvc.perform(get("/api/accounts/" + testAccount.getId()))
+        mockMvc.perform(get("/accounts/" + testAccount.getId()))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(username = "client@example.com", roles = "CLIENT")
     void testGetBalance() throws Exception {
-        mockMvc.perform(get("/api/accounts/me/balance"))
+        mockMvc.perform(get("/accounts/me/balance"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balance").value(5000));
     }

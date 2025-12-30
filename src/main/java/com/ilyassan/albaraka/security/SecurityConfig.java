@@ -3,6 +3,7 @@ package com.ilyassan.albaraka.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,6 +60,7 @@ public class SecurityConfig {
     // ===== CHAIN 1: OAuth 2.0 + Keycloak (@Order 1) =====
     @Bean
     @Order(1)
+    @Profile("!test")  // Don't create OAuth filter chain in test environment
     public SecurityFilterChain oauthFilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/oauth2/**", "/login/oauth2/**", "/oauth/**")
