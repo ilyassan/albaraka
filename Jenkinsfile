@@ -197,11 +197,11 @@ pipeline {
                         docker pull ${IMAGE_NAME}:latest
 
                         # Stop and remove old containers
-                        docker-compose -f docker-compose.prod.yml down || true
+                        docker compose -f docker-compose.prod.yml down || true
 
                         # Start new containers
                         export IMAGE_VERSION=${IMAGE_TAG}
-                        docker-compose -f docker-compose.prod.yml up -d
+                        docker compose -f docker-compose.prod.yml up -d
 
                         # Wait for application to start
                         sleep 15
@@ -211,7 +211,7 @@ pipeline {
                         MAX_RETRIES=12
 
                         while [ \$RETRY_COUNT -lt \$MAX_RETRIES ]; do
-                            if docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+                            if docker compose -f docker-compose.prod.yml ps | grep -q "Up"; then
                                 echo "✅ Application is running!"
                                 exit 0
                             fi
@@ -245,10 +245,10 @@ pipeline {
                         cd ${DEPLOY_PATH}
 
                         echo "Running containers:"
-                        docker-compose -f docker-compose.prod.yml ps
+                        docker compose -f docker-compose.prod.yml ps
 
                         echo "\nContainer logs (last 20 lines):"
-                        docker-compose -f docker-compose.prod.yml logs --tail=20 app
+                        docker compose -f docker-compose.prod.yml logs --tail=20 app
                     '
                 """
             }
