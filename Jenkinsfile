@@ -148,6 +148,21 @@ pipeline {
             }
         }
 
+        stage('Copy Configuration Files') {
+            steps {
+                script {
+                    echo "=========================================="
+                    echo "Stage: Copying Configuration to Production"
+                    echo "=========================================="
+                }
+
+                sh """
+                    scp -o StrictHostKeyChecking=no docker-compose.prod.yml ${DEPLOY_HOST}:${DEPLOY_PATH}/
+                    echo "✅ Configuration files copied to production server"
+                """
+            }
+        }
+
         stage('Backup Current Version') {
             steps {
                 script {
