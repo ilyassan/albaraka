@@ -74,7 +74,7 @@ class AuthControllerTest {
 
     @Test
     void testLoginSuccess() throws Exception {
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(validLoginRequest)))
                 .andExpect(status().isOk())
@@ -90,7 +90,7 @@ class AuthControllerTest {
                 .password("wrongpassword")
                 .build();
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isUnauthorized());
@@ -103,7 +103,7 @@ class AuthControllerTest {
                 .password("password123")
                 .build();
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isUnauthorized());
@@ -116,7 +116,7 @@ class AuthControllerTest {
                 .password("password123")
                 .build();
 
-        mockMvc.perform(post("/auth/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());

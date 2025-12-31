@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Baraka Digital - Login</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <h1>Al Baraka Digital</h1>
+                <p>Plateforme Bancaire Intelligente</p>
+            </div>
+
+            <!-- Error Message -->
+            <div th:if="${error}" class="alert alert-error">
+                <span th:text="${error}">Error message</span>
+            </div>
+
+            <!-- Logout Success Message -->
+            <div th:if="${message}" class="alert alert-success">
+                <span th:text="${message}">Success message</span>
+            </div>
+
+            <!-- Login Form -->
+            <form th:action="@{/login}" method="post" class="login-form">
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input
+                        type="email"
+                        id="username"
+                        name="username"
+                        placeholder="client@albaraka.com"
+                        required
+                        autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="••••••••"
+                        required>
+                </div>
+
+                <div class="form-group remember-me">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember-me" id="remember-me">
+                        <span>Remember Me</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+
+            <div class="login-footer">
+                <p>&copy; 2025 Al Baraka Digital. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al Baraka Digital - Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>Al Baraka Digital</h1>
+                <div class="user-info">
+                    <span>Welcome, <span sec:authentication="name">User</span></span>
+                    <form th:action="@{/logout}" method="post" style="display: inline;">
+                        <button type="submit" class="btn-logout">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-main">
+            <div class="welcome-section">
+                <h2>Welcome to Al Baraka Digital Banking</h2>
+                <p>Plateforme Bancaire Intelligente et Sécurisée</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- CLIENT Features -->
+                <div sec:authorize="hasRole('CLIENT')" class="feature-card">
+                    <h3>Client Dashboard</h3>
+                    <ul>
+                        <li>View Account Balance</li>
+                        <li>Make Deposits & Withdrawals</li>
+                        <li>Transfer Money</li>
+                        <li>Upload Transaction Documents</li>
+                    </ul>
+                </div>
+
+                <!-- AGENT Features -->
+                <div sec:authorize="hasRole('AGENT_BANCAIRE')" class="feature-card">
+                    <h3>Agent Banking Dashboard</h3>
+                    <ul>
+                        <li>Review Pending Transactions</li>
+                        <li>Verify Transaction Documents</li>
+                        <li>Approve/Reject Operations</li>
+                        <li>AI-Powered Validation Insights</li>
+                    </ul>
+                </div>
+
+                <!-- ADMIN Features -->
+                <div sec:authorize="hasRole('ADMIN')" class="feature-card">
+                    <h3>Administrator Dashboard</h3>
+                    <ul>
+                        <li>Manage User Accounts</li>
+                        <li>Create/Modify Clients & Agents</li>
+                        <li>Manage User Roles</li>
+                        <li>System Configuration</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Your Security Information</h3>
+                <div class="info-box">
+                    <p><strong>Username:</strong> <span sec:authentication="name">N/A</span></p>
+                    <p><strong>Roles:</strong> <span sec:authentication="principal.authorities">N/A</span></p>
+                </div>
+            </div>
+
+            <div class="api-info">
+                <h3>API Endpoints</h3>
+                <p>Access the REST API at: <code>/api/*</code></p>
+                <p>JWT Authentication required for all API endpoints</p>
+            </div>
+        </main>
+
+        <footer class="dashboard-footer">
+            <p>&copy; 2025 Al Baraka Digital. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

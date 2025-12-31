@@ -57,45 +57,85 @@ public class SecurityConfig {
         return source;
     }
 
-    // ===== CHAIN 1: OAuth 2.0 + Keycloak (@Order 1) =====
+    // ===== CHAIN 1: Form Login for Web Pages (@Order 1) =====
     @Bean
     @Order(1)
-    @Profile("!test")  // Don't create OAuth filter chain in test environment
-    public SecurityFilterChain oauthFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain formLoginFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/oauth2/**", "/login/oauth2/**", "/oauth/**")
+                .securityMatcher("/", "/login", "/dashboard", "/logout", "/css/**", "/js/**", "/images/**")
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers("/oauth/**").authenticated()
-                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/oauth2/authorization/keycloak")
-                        .defaultSuccessUrl("/oauth/success", true)
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/login").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/dashboard", true)
+                        .failureUrl("/login?error=true")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .permitAll()
+                )
+                .rememberMe(remember -> remember
+                        .key("albaraka-remember-me-key")
+                        .tokenValiditySeconds(86400) // 24 hours
+                        .rememberMeParameter("remember-me")
+                        .userDetailsService(userDetailsService)
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID", "remember-me")
+                        .permitAll()
                 );
 
         return http.build();
     }
 
-    // ===== CHAIN 2: JWT Authentication (@Order 2 - Fallback) =====
+    // ===== CHAIN 2: OAuth 2.0 + Keycloak (@Order 2) =====
     @Bean
     @Order(2)
+    @Profile("!test")  // Don't create OAuth filter chain in test environment
+    public SecurityFilterChain oauthFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/oauth2/**", "/login/oauth2/**", "/api/oauth/**")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .requestMatchers("/api/oauth/**").authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/oauth2/authorization/keycloak")
+                        .defaultSuccessUrl("/api/oauth/success", true)
+                );
+
+        return http.build();
+    }
+
+    // ===== CHAIN 3: JWT Authentication for REST API (@Order 3) =====
+    @Bean
+    @Order(3)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/**")  // Match all paths not matched by OAuth chain
+                .securityMatcher("/api/**")  // Match only API paths
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/admin/users").permitAll()
-                        .requestMatchers("/admin/**").authenticated()
-                        .requestMatchers("/accounts/**").authenticated()
-                        .requestMatchers("/transactions/**").authenticated()
-                        .requestMatchers("/documents/**").authenticated()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/users").permitAll()
+                        .requestMatchers("/api/admin/**").authenticated()
+                        .requestMatchers("/api/accounts/**").authenticated()
+                        .requestMatchers("/api/transactions/**").authenticated()
+                        .requestMatchers("/api/documents/**").authenticated()
+                        .requestMatchers("/api/v3/api-docs/**", "/api/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
